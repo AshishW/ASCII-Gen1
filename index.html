@@ -49,7 +49,6 @@
         }
         input:focus, select:focus {
             outline: none;
-            ring: 2px solid var(--neon-green);
         }
         header h1 {
             animation: glitch 2s linear infinite;
@@ -59,9 +58,9 @@
             4%, 60% { transform: translate(-2px, 0) skew(0deg); }
             62% { transform: translate(0, 0) skew(5deg); }
         }
-        .section-glow {
+        /* .section-glow {
             box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
-        }
+        } */
         #ascii-art canvas {
             width: 100% !important;
             max-width: 100%;
@@ -101,12 +100,12 @@
                 <div>
                     <label for="char-set" class="block text-sm text-electric-purple">Character Set</label>
                     <select id="char-set" class="w-full">
+                        <option value="matrix">Matrix</option>
                         <option value="standard">Standard ASCII</option>
                         <option value="extended">Extended ASCII</option>
                         <option value="emojis">Emojis</option>
                         <option value="starwars">Star Wars</option>
                         <option value="minecraft">Minecraft</option>
-                        <option value="matrix">Matrix</option>
                         <option value="custom">Custom</option>
                     </select>
                 </div>
@@ -167,6 +166,22 @@
         document.getElementById('char-set').addEventListener('change', function() {
             const customDiv = document.getElementById('custom-char-set');
             customDiv.classList.toggle('hidden', this.value !== 'custom');
+            
+            // Update background color picker with automatic color
+            const bgColorInput = document.getElementById('bg-color');
+            switch (this.value) {
+                case 'minecraft':
+                case 'extended':
+                    bgColorInput.value = '#FFFFFF';
+                    break;
+                case 'matrix':
+                case 'standard':
+                case 'emojis':
+                case 'starwars':
+                    bgColorInput.value = '#000000';
+                    break;
+            }
+            
             if (!isVideoMode) convertToAscii();
         });
         document.getElementById('custom-chars').addEventListener('input', () => {
@@ -296,39 +311,115 @@
             }
         });
 
-        // Record Video (for videos)
+        // Replace the Record Video button handler
         document.getElementById('record-video-button').addEventListener('click', function() {
-            if (videoElement.src && !mediaRecorder) {
-                const stream = currentCanvas.captureStream(30); // 30 FPS
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp8,opus' });
-                recordedChunks = [];
-                mediaRecorder.ondataavailable = (event) => recordedChunks.push(event.data);
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                    saveAs(blob, 'ascii-video.webm');
-                    mediaRecorder = null;
-                    recordedChunks = []; // Reset chunks to prevent memory leaks
-                };
-                mediaRecorder.onerror = (event) => {
-                    console.error('MediaRecorder error:', event.error);
-                    alert('An error occurred while recording the video. Please try again.');
-                };
-                mediaRecorder.start(1000); // Record in 1-second chunks for stability
+            if (videoElement.src) {
+                // Start recording frames
+                const fps = 15;
+                const recordingLength = 10000; // 10 seconds max
+                const framesToCapture = (fps * recordingLength) / 1000;
+                let frames = [];
+                let frameCount = 0;
+                
+                // Show recording status
+                alert('Recording started. Will record up to 10 seconds of video.');
                 document.getElementById('record-video-button').classList.add('hidden');
                 document.getElementById('stop-record-button').classList.remove('hidden');
+                
+                // Play the video and start ASCII conversion
                 videoElement.play();
                 animateAsciiVideo();
+                
+                // Create a recording timer that captures frames
+                const recordingTimer = setInterval(() => {
+                    if (frameCount >= framesToCapture || videoElement.paused || videoElement.ended) {
+                        clearInterval(recordingTimer);
+                        finishRecording();
+                        return;
+                    }
+                    
+                    // Capture current frame
+                    const frameImg = new Image();
+                    frameImg.src = currentCanvas.toDataURL('image/png');
+                    frames.push(frameImg);
+                    frameCount++;
+                }, 1000 / fps);
+                
+                // Store the timer so we can clear it when stopping
+                window.activeRecordingTimer = recordingTimer;
+                
+                function finishRecording() {
+                    if (frames.length > 0) {
+                        // Create temporary canvas for the output video frames
+                        const tempCanvas = document.createElement('canvas');
+                        tempCanvas.width = currentCanvas.width;
+                        tempCanvas.height = currentCanvas.height;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        
+                        // Create a stream from this canvas
+                        const stream = tempCanvas.captureStream(fps);
+                        const recorder = new MediaRecorder(stream, {
+                            mimeType: 'video/webm;codecs=vp9',
+                            videoBitsPerSecond: 5000000 // 5 Mbps
+                        });
+                        
+                        const chunks = [];
+                        recorder.ondataavailable = e => {
+                            if (e.data.size > 0) chunks.push(e.data);
+                        };
+                        
+                        recorder.onstop = () => {
+                            // Create and download the video file
+                            const blob = new Blob(chunks, {type: 'video/webm'});
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'ascii-video.webm';
+                            document.body.appendChild(a);
+                            a.click();
+                            
+                            setTimeout(() => {
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                            }, 100);
+                            
+                            // Reset UI
+                            document.getElementById('record-video-button').classList.remove('hidden');
+                            document.getElementById('stop-record-button').classList.add('hidden');
+                        };
+                        
+                        // Start the recording process
+                        recorder.start();
+                        
+                        // Draw each frame to the canvas with proper timing to create the video
+                        let frameIndex = 0;
+                        const frameInterval = setInterval(() => {
+                            if (frameIndex >= frames.length) {
+                                clearInterval(frameInterval);
+                                recorder.stop();
+                                return;
+                            }
+                            
+                            tempCtx.drawImage(frames[frameIndex], 0, 0, tempCanvas.width, tempCanvas.height);
+                            frameIndex++;
+                        }, 1000 / fps);
+                    } else {
+                        // No frames were captured
+                        alert('No video data was recorded. Please try again.');
+                        document.getElementById('record-video-button').classList.remove('hidden');
+                        document.getElementById('stop-record-button').classList.add('hidden');
+                    }
+                }
             }
         });
 
-        // Stop Recording (for videos)
+        // Replace the Stop Recording button handler
         document.getElementById('stop-record-button').addEventListener('click', function() {
-            if (mediaRecorder) {
-                mediaRecorder.stop();
+            if (window.activeRecordingTimer) {
+                clearInterval(window.activeRecordingTimer);
+                window.activeRecordingTimer = null;
                 videoElement.pause();
                 cancelAnimationFrame(animationFrameId);
-                document.getElementById('record-video-button').classList.remove('hidden');
-                document.getElementById('stop-record-button').classList.add('hidden');
             }
         });
 
@@ -340,22 +431,27 @@
             const customChars = document.getElementById('custom-chars').value;
             const aiEnhance = document.getElementById('ai-enhance').checked;
             const animation = document.getElementById('animation').checked;
-            const bgColor = document.getElementById('bg-color').value;
+            const bgColor = getBackgroundColor(charSetName);
             let charSet = charSetName === 'custom' ? customChars.split('') : getPredefinedCharSet(charSetName);
             return { columns, rows, charSet, aiEnhance, animation, bgColor };
+        }
+
+        // Modify the getBackgroundColor function
+        function getBackgroundColor(charSetName) {
+            return document.getElementById('bg-color').value;
         }
 
         // Predefined character sets
         function getPredefinedCharSet(name) {
             const sets = {
+                matrix: ['1', '0', '1', '0'],
                 standard: ['@', '%', '#', '*', '+', '=', '-', ':', '.', ' '],
                 extended: ['█', '▓', '▒', '░', ' ', ' ', ' ', ' ', ' ', ' '],
-                emojis: ['😈', '😎', '😜', '😋', '😊', '😄', '😃', '😀', '😶', ' '],
+                emojis: ['✨', '😎', '😜', '😋', '😊', '😄', '😃', '😀', '😶', ' '],
                 starwars: ['∑', '∆', 'Ω', '∞', ' ', ' ', ' ', ' ', ' ', ' '],
-                minecraft: ['█', '▓', '▒', '░', ' ', ' ', ' ', ' ', ' ', ' '],
-                matrix: ['1', '0']
+                minecraft: ['█', '▓', '▒', '░', ' ', ' ', ' ', ' ', ' ', ' ']
             };
-            return sets[name] || sets.standard;
+            return sets[name] || sets.matrix;
         }
 
         // Detect faces (for images only)
