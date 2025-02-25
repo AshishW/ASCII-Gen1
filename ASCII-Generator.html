@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Unleashed</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Orbitron:wght@400;700&display=swap');
+        :root {
+            --charcoal: #1F2937;
+            --midnight: #111827;
+            --cyber-blue: #00E5FF;
+            --electric-purple: #a281fd;
+            --neon-green: #4ADE80;
+        }
+        .bg-charcoal { background-color: var(--charcoal); }
+        .text-cyber-blue { color: var(--cyber-blue); }
+        .bg-electric-purple { background-color: var(--electric-purple); }
+        .text-electric-purple { color: var(--electric-purple); }
+        .bg-neon-green { background-color: var(--neon-green); }
+        .text-neon-green { color: var(--neon-green); }
+        body {
+            background: radial-gradient(circle at center, var(--midnight) 0%, var(--charcoal) 100%);
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyber-blue);
+        }
+        .ascii-art { font-family: 'JetBrains Mono', monospace; white-space: pre; }
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            background: linear-gradient(45deg, var(--electric-purple), var(--cyber-blue));
+            color: white;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+        input, select {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            background-color: var(--midnight);
+            border: 1px solid #374151;
+            color: var(--cyber-blue);
+        }
+        input:focus, select:focus {
+            outline: none;
+            ring: 2px solid var(--neon-green);
+        }
+        header h1 {
+            animation: glitch 2s linear infinite;
+        }
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(5deg); }
+        }
+        .section-glow {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+        #ascii-art canvas {
+            width: 100% !important;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-midnight text-cyber-blue p-8">
+        <h1 class="text-4xl font-bold text-center">ASCII Unleashed</h1>
+    </header>
+    <main class="container mx-auto p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <section id="input-section" class="bg-charcoal p-8 rounded-xl section-glow">
+            <h2 class="text-2xl font-bold mb-6 text-neon-green">Upload Your Media</h2>
+            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-6">
+                <div class="w-full md:w-1/2">
+                    <label for="image-input" class="block text-sm text-electric-purple">Upload Image</label>
+                    <input type="file" id="image-input" accept="image/*" class="w-full">
+                </div>
+                <div class="w-full md:w-1/2">
+                    <label for="video-input" class="block text-sm text-electric-purple">Upload Video</label>
+                    <input type="file" id="video-input" accept="video/*" class="w-full">
+                </div>
+            </div>
+            <img id="image-preview" class="max-w-md h-auto rounded-lg mb-6 border border-cyber-blue hidden" alt="Image Preview">
+            <video id="video-element" style="display: none;"></video>
+            <button id="play-pause-button" class="btn hidden">Play/Pause</button>
+            <h2 class="text-2xl font-bold mb-6 text-neon-green">Settings</h2>
+            <div id="settings-panel" class="space-y-6">
+                <div>
+                    <label for="columns" class="block text-sm text-electric-purple">Columns</label>
+                    <input type="number" id="columns" value="80" min="10" max="200" class="w-full">
+                </div>
+                <div>
+                    <label for "rows" class="block text-sm text-electric-purple">Rows</label>
+                    <input type="number" id="rows" value="40" min="10" max="200" class="w-full">
+                </div>
+                <div>
+                    <label for="char-set" class="block text-sm text-electric-purple">Character Set</label>
+                    <select id="char-set" class="w-full">
+                        <option value="standard">Standard ASCII</option>
+                        <option value="extended">Extended ASCII</option>
+                        <option value="emojis">Emojis</option>
+                        <option value="starwars">Star Wars</option>
+                        <option value="minecraft">Minecraft</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div id="custom-char-set" class="hidden">
+                    <label for="custom-chars" class="block text-sm text-electric-purple">Custom Characters (dark to light)</label>
+                    <input type="text" id="custom-chars" class="w-full" placeholder="e.g., @%#*+=-:. ">
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="ai-enhance" class="mr-2 bg-midnight border-gray-700">
+                    <label for="ai-enhance" class="text-sm text-electric-purple">AI Enhancement (Images Only)</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="animation" class="mr-2 bg-midnight border-gray-700">
+                    <label for="animation" class="text-sm text-electric-purple">Animation (Images Only)</label>
+                </div>
+                <div>
+                    <label for="bg-color" class="block text-sm text-electric-purple">Background Color</label>
+                    <input type="color" id="bg-color" value="#111827" class="w-full h-10 p-1 rounded-lg bg-midnight border border-gray-700">
+                </div>
+            </div>
+        </section>
+        <section id="ascii-section" class="bg-charcoal p-8 rounded-xl section-glow">
+            <h2 class="text-2xl font-bold mb-6 text-neon-green">Your ASCII Art</h2>
+            <div id="ascii-art" class="overflow-auto p-6 bg-midnight rounded-lg shadow-inner border border-cyber-blue"></div>
+        </section>
+    </main>
+    <footer class="bg-midnight p-8 text-center space-x-4">
+        <button id="convert-button" class="btn">Convert</button>
+        <button id="challenge-button" class="btn">Challenge Me</button>
+        <button id="download-text-button" class="btn hidden">Download Text</button>
+        <button id="download-image-button" class="btn hidden">Download Image</button>
+        <button id="record-video-button" class="btn hidden">Record Video</button>
+        <button id="stop-record-button" class="btn hidden">Stop Recording</button>
+    </footer>
+
+    <script>
+        let isVideoMode = false;
+        let currentCanvas = null;
+        let videoElement = document.getElementById('video-element');
+        let playPauseButton = document.getElementById('play-pause-button');
+        let animationFrameId;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+
+        // Load face-api models
+        async function loadModels() {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+        }
+        loadModels();
+
+        // Event listeners for settings changes
+        document.getElementById('columns').addEventListener('input', () => {
+            if (!isVideoMode) convertToAscii();
+        });
+        document.getElementById('rows').addEventListener('input', () => {
+            if (!isVideoMode) convertToAscii();
+        });
+        document.getElementById('char-set').addEventListener('change', function() {
+            const customDiv = document.getElementById('custom-char-set');
+            customDiv.classList.toggle('hidden', this.value !== 'custom');
+            if (!isVideoMode) convertToAscii();
+        });
+        document.getElementById('custom-chars').addEventListener('input', () => {
+            if (!isVideoMode) convertToAscii();
+        });
+        document.getElementById('ai-enhance').addEventListener('change', () => {
+            if (!isVideoMode) convertToAscii();
+        });
+        document.getElementById('animation').addEventListener('change', () => {
+            if (!isVideoMode) convertToAscii();
+        });
+        document.getElementById('bg-color').addEventListener('input', () => {
+            if (!isVideoMode) convertToAscii();
+        });
+        document.getElementById('convert-button').addEventListener('click', () => {
+            if (!isVideoMode) convertToAscii();
+        });
+
+        // Image upload handler
+        document.getElementById('image-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                isVideoMode = false;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('image-preview');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    img.onload = () => {
+                        autoSetResolution(img);
+                        convertToAscii();
+                    };
+                };
+                reader.readAsDataURL(file);
+                playPauseButton.classList.add('hidden');
+                document.getElementById('download-text-button').classList.remove('hidden');
+                document.getElementById('download-image-button').classList.remove('hidden');
+                document.getElementById('record-video-button').classList.add('hidden');
+                document.getElementById('stop-record-button').classList.add('hidden');
+            }
+        });
+
+        // Video upload handler
+        document.getElementById('video-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                isVideoMode = true;
+                const url = URL.createObjectURL(file);
+                videoElement.src = url;
+                videoElement.load();
+                videoElement.onloadedmetadata = () => {
+                    autoSetResolution(videoElement);
+                };
+                document.getElementById('image-preview').classList.add('hidden');
+                playPauseButton.classList.remove('hidden');
+                document.getElementById('download-text-button').classList.add('hidden');
+                document.getElementById('download-image-button').classList.add('hidden');
+                document.getElementById('record-video-button').classList.remove('hidden');
+                document.getElementById('stop-record-button').classList.add('hidden');
+            }
+        });
+
+        // Play/Pause button handler
+        playPauseButton.addEventListener('click', function() {
+            if (videoElement.paused) {
+                videoElement.play();
+                animateAsciiVideo();
+            } else {
+                videoElement.pause();
+                cancelAnimationFrame(animationFrameId);
+            }
+        });
+
+        // Challenge generator
+        const challenges = [
+            { theme: 'Cyberpunk Pet', charSet: 'extended' },
+            { theme: 'Retro Selfie', charSet: 'standard' },
+            { theme: 'Emoji Landscape', charSet: 'emojis' },
+            { theme: 'Star Wars Scene', charSet: 'starwars' },
+            { theme: 'Minecraft World', charSet: 'minecraft' },
+        ];
+        document.getElementById('challenge-button').addEventListener('click', function() {
+            const challenge = challenges[Math.floor(Math.random() * challenges.length)];
+            document.getElementById('char-set').value = challenge.charSet;
+            document.getElementById('char-set').dispatchEvent(new Event('change'));
+            alert(`Challenge: Create a "${challenge.theme}" ASCII art! Share with #ASCIIChallenge`);
+        });
+
+        // Download Text (for images)
+        document.getElementById('download-text-button').addEventListener('click', function() {
+            if (currentCanvas) {
+                const settings = getSettings();
+                const { charWidth, charHeight } = getCharacterDimensions();
+                let asciiText = '';
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = settings.columns;
+                tempCanvas.height = settings.rows;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(currentCanvas, 0, 0, settings.columns, settings.rows);
+                const imageData = tempCtx.getImageData(0, 0, settings.columns, settings.rows);
+                const Pixels = imageData.data;
+
+                for (let y = 0; y < settings.rows; y++) {
+                    for (let x = 0; x < settings.columns; x++) {
+                        const index = (y * settings.columns + x) * 4;
+                        const gray = 0.299 * Pixels[index] + 0.587 * Pixels[index + 1] + 0.114 * Pixels[index + 2];
+                        asciiText += gray > 128 ? ' ' : '#';  // Black and white representation
+                    }
+                    asciiText += '\n';
+                }
+                const blob = new Blob([asciiText], { type: 'text/plain;charset=utf-8' });
+                saveAs(blob, 'ascii-art.txt');
+            } else {
+                alert('No ASCII art to download yet! Convert an image first.');
+            }
+        });
+
+        // Download Image (for images)
+        document.getElementById('download-image-button').addEventListener('click', function() {
+            if (currentCanvas) {
+                const link = document.createElement('a');
+                link.download = 'ascii-art.png';
+                link.href = currentCanvas.toDataURL('image/png');
+                link.click();
+            } else {
+                alert('No ASCII art to download yet! Convert an image first.');
+            }
+        });
+
+        // Record Video (for videos)
+        document.getElementById('record-video-button').addEventListener('click', function() {
+            if (videoElement.src && !mediaRecorder) {
+                const stream = currentCanvas.captureStream(30); // 30 FPS
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp8,opus' });
+                recordedChunks = [];
+                mediaRecorder.ondataavailable = (event) => recordedChunks.push(event.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    saveAs(blob, 'ascii-video.webm');
+                    mediaRecorder = null;
+                    recordedChunks = []; // Reset chunks to prevent memory leaks
+                };
+                mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event.error);
+                    alert('An error occurred while recording the video. Please try again.');
+                };
+                mediaRecorder.start(1000); // Record in 1-second chunks for stability
+                document.getElementById('record-video-button').classList.add('hidden');
+                document.getElementById('stop-record-button').classList.remove('hidden');
+                videoElement.play();
+                animateAsciiVideo();
+            }
+        });
+
+        // Stop Recording (for videos)
+        document.getElementById('stop-record-button').addEventListener('click', function() {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                videoElement.pause();
+                cancelAnimationFrame(animationFrameId);
+                document.getElementById('record-video-button').classList.remove('hidden');
+                document.getElementById('stop-record-button').classList.add('hidden');
+            }
+        });
+
+        // Get settings
+        function getSettings() {
+            const columns = parseInt(document.getElementById('columns').value);
+            const rows = parseInt(document.getElementById('rows').value);
+            const charSetName = document.getElementById('char-set').value;
+            const customChars = document.getElementById('custom-chars').value;
+            const aiEnhance = document.getElementById('ai-enhance').checked;
+            const animation = document.getElementById('animation').checked;
+            const bgColor = document.getElementById('bg-color').value;
+            let charSet = charSetName === 'custom' ? customChars.split('') : getPredefinedCharSet(charSetName);
+            return { columns, rows, charSet, aiEnhance, animation, bgColor };
+        }
+
+        // Predefined character sets
+        function getPredefinedCharSet(name) {
+            const sets = {
+                standard: ['@', '%', '#', '*', '+', '=', '-', ':', '.', ' '],
+                extended: ['█', '▓', '▒', '░', ' ', ' ', ' ', ' ', ' ', ' '],
+                emojis: ['😈', '😎', '😜', '😋', '😊', '😄', '😃', '😀', '😶', ' '],
+                starwars: ['∑', '∆', 'Ω', '∞', ' ', ' ', ' ', ' ', ' ', ' '],
+                minecraft: ['█', '▓', '▒', '░', ' ', ' ', ' ', ' ', ' ', ' '],
+                matrix: ['1', '0']
+            };
+            return sets[name] || sets.standard;
+        }
+
+        // Detect faces (for images only)
+        async function detectFaces(img) {
+            try {
+                const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions());
+                return detections;
+            } catch (error) {
+                console.error('Face detection failed:', error);
+                return [];
+            }
+        }
+
+        // Check if a point is in a face area (for images only)
+        function isInFaceArea(x, y, detections, scaleX, scaleY) {
+            for (const detection of detections) {
+                const box = detection.box;
+                const left = box.x * scaleX;
+                const top = box.y * scaleY;
+                const right = (box.x + box.width) * scaleX;
+                const bottom = (box.y + box.height) * scaleY;
+                if (x >= left && x < right && y >= top && y < bottom) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Auto-set resolution based on media dimensions
+        function autoSetResolution(media) {
+            const aspectRatio = media.naturalWidth / media.naturalHeight || media.videoWidth / media.videoHeight;
+            const columns = Math.min(200, Math.max(10, Math.round(80 * aspectRatio)));
+            const rows = Math.min(200, Math.max(10, 40));
+            document.getElementById('columns').value = columns;
+            document.getElementById('rows').value = rows;
+        }
+
+        // Get character dimensions
+        function getCharacterDimensions() {
+            const columns = parseInt(document.getElementById('columns').value);
+            const pre = document.createElement('pre');
+            pre.style.position = 'absolute';
+            pre.style.visibility = 'hidden';
+            pre.style.fontFamily = 'JetBrains Mono, monospace';
+            pre.style.fontSize = `${Math.max(5, 16 - (columns / 10))}px`; // Dynamic scaling
+            pre.textContent = 'M';
+            document.body.appendChild(pre);
+            const rect = pre.getBoundingClientRect();
+            const charWidth = rect.width;
+            const charHeight = rect.height;
+            document.body.removeChild(pre);
+            return { charWidth, charHeight };
+        }
+
+        // Convert image to ASCII
+        async function convertToAscii() {
+            if (isVideoMode) return;
+            const settings = getSettings();
+            const img = document.getElementById('image-preview');
+            if (!img.src) return;
+
+            let detections = [];
+            if (settings.aiEnhance) {
+                detections = await detectFaces(img);
+            }
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const { charWidth, charHeight } = getCharacterDimensions();
+            canvas.width = settings.columns * charWidth;
+            canvas.height = settings.rows * charHeight;
+            ctx.font = `${Math.max(5, 16 - (settings.columns / 10))}px JetBrains Mono, monospace`;
+
+            // Set background color
+            ctx.fillStyle = settings.bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = settings.columns;
+            tempCanvas.height = settings.rows;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(img, 0, 0, settings.columns, settings.rows);
+            const imageData = tempCtx.getImageData(0, 0, settings.columns, settings.rows);
+            const Pixels = imageData.data;
+
+            const scaleX = settings.columns / img.naturalWidth;
+            const scaleY = settings.rows / img.naturalHeight;
+
+            const asciiArtElement = document.getElementById('ascii-art');
+            asciiArtElement.innerHTML = '';
+            asciiArtElement.appendChild(canvas);
+            currentCanvas = canvas;
+
+            if (settings.animation) {
+                let row = 0;
+                const interval = setInterval(() => {
+                    if (row < settings.rows) {
+                        for (let x = 0; x < settings.columns; x++) {
+                            const y = row;
+                            const index = (y * settings.columns + x) * 4;
+                            const r = Pixels[index];
+                            const g = Pixels[index + 1];
+                            const b = Pixels[index + 2];
+                            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                            let charSetToUse = settings.charSet;
+                            if (settings.aiEnhance && isInFaceArea(x, y, detections, scaleX, scaleY)) {
+                                charSetToUse = ['@', '#', '%', '*', '+'];
+                            }
+                            const charIndex = Math.floor((gray / 255) * (charSetToUse.length - 1));
+                            const char = charSetToUse[charIndex];
+                            ctx.fillStyle = `rgb(${r},${g},${b})`;
+                            ctx.fillText(char, x * charWidth, y * charHeight);
+                        }
+                        row++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 50);
+            } else {
+                for (let y = 0; y < settings.rows; y++) {
+                    for (let x = 0; x < settings.columns; x++) {
+                        const index = (y * settings.columns + x) * 4;
+                        const r = Pixels[index];
+                        const g = Pixels[index + 1];
+                        const b = Pixels[index + 2];
+                        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                        let charSetToUse = settings.charSet;
+                        if (settings.aiEnhance && isInFaceArea(x, y, detections, scaleX, scaleY)) {
+                            charSetToUse = ['@', '#', '%', '*', '+'];
+                        }
+                        const charIndex = Math.floor((gray / 255) * (charSetToUse.length - 1));
+                        const char = charSetToUse[charIndex];
+                        ctx.fillStyle = `rgb(${r},${g},${b})`;
+                        ctx.fillText(char, x * charWidth, y * charHeight);
+                    }
+                }
+            }
+        }
+
+        // Animate ASCII video
+        function animateAsciiVideo() {
+            if (!videoElement.paused && !videoElement.ended) {
+                convertVideoFrameToAscii();
+                animationFrameId = requestAnimationFrame(animateAsciiVideo);
+            }
+        }
+
+        // Convert video frame to ASCII
+        function convertVideoFrameToAscii() {
+            const settings = getSettings();
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const { charWidth, charHeight } = getCharacterDimensions();
+            canvas.width = settings.columns * charWidth;
+            canvas.height = settings.rows * charHeight;
+            ctx.font = `${Math.max(5, 16 - (settings.columns / 10))}px JetBrains Mono, monospace`;
+
+            // Set background color
+            ctx.fillStyle = settings.bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = settings.columns;
+            tempCanvas.height = settings.rows;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(videoElement, 0, 0, settings.columns, settings.rows);
+            const imageData = tempCtx.getImageData(0, 0, settings.columns, settings.rows);
+            const Pixels = imageData.data;
+
+            for (let y = 0; y < settings.rows; y++) {
+                for (let x = 0; x < settings.columns; x++) {
+                    const index = (y * settings.columns + x) * 4;
+                    const r = Pixels[index];
+                    const g = Pixels[index + 1];
+                    const b = Pixels[index + 2];
+                    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                    const charIndex = Math.floor((gray / 255) * (settings.charSet.length - 1));
+                    const char = settings.charSet[charIndex];
+                    ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    ctx.fillText(char, x * charWidth, y * charHeight);
+                }
+            }
+
+            const asciiArtElement = document.getElementById('ascii-art');
+            asciiArtElement.innerHTML = '';
+            asciiArtElement.appendChild(canvas);
+            currentCanvas = canvas;
+        }
+    </script>
+</body>
+</html>
