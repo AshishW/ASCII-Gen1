@@ -5,140 +5,626 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASCII Unleashed</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Orbitron:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         :root {
             --charcoal: #1F2937;
-            --midnight: #111827;
-            --cyber-blue: #00E5FF;
-            --electric-purple: #a281fd;
-            --neon-green: #4ADE80;
+            --midnight: #0F172A;
+            --slate-900: #0F172A;
+            --slate-800: #1E293B;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748B;
+            --slate-400: #94A3B8;
+            --slate-300: #CBD5E1;
+            --slate-200: #E2E8F0;
+            --slate-100: #F1F5F9;
+            --cyber-blue: #3B82F6;
+            --electric-purple: #8B5CF6;
+            --neon-green: #10B981;
+            --accent-orange: #F59E0B;
+            --danger-red: #EF4444;
+            --success-green: #22C55E;
         }
+        
+        /* Modern color utilities */
         .bg-charcoal { background-color: var(--charcoal); }
+        .bg-slate-900 { background-color: var(--slate-900); }
+        .bg-slate-800 { background-color: var(--slate-800); }
+        .bg-slate-700 { background-color: var(--slate-700); }
         .text-cyber-blue { color: var(--cyber-blue); }
-        .bg-electric-purple { background-color: var(--electric-purple); }
         .text-electric-purple { color: var(--electric-purple); }
-        .bg-neon-green { background-color: var(--neon-green); }
         .text-neon-green { color: var(--neon-green); }
+        .text-slate-300 { color: var(--slate-300); }
+        .text-slate-400 { color: var(--slate-400); }
+        .border-slate-700 { border-color: var(--slate-700); }
+        .border-slate-600 { border-color: var(--slate-600); }
+        
         body {
-            background: radial-gradient(circle at center, var(--midnight) 0%, var(--charcoal) 100%);
-            font-family: 'Orbitron', sans-serif;
-            color: var(--cyber-blue);
+            background: linear-gradient(135deg, var(--slate-900) 0%, var(--midnight) 50%, var(--charcoal) 100%);
+            font-family: 'Inter', sans-serif;
+            color: var(--slate-200);
+            min-height: 100vh;
         }
-        .ascii-art { font-family: 'JetBrains Mono', monospace; white-space: pre; }
+        
+        .ascii-art { 
+            font-family: 'JetBrains Mono', monospace; 
+            white-space: pre; 
+        }
+        
+        /* Modern button styling */
         .btn {
-            padding: 0.5rem 1.5rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 0.75rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-            background: linear-gradient(45deg, var(--electric-purple), var(--cyber-blue));
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.2s ease-in-out;
+            background: linear-gradient(135deg, var(--cyber-blue), var(--electric-purple));
             color: white;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
+        
         .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--neon-green);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        input, select {
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: var(--slate-700);
+            color: var(--slate-200);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--slate-600);
+        }
+        
+        /* Modern form elements */
+        .form-input {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--slate-800);
+            border: 1px solid var(--slate-700);
+            color: var(--slate-200);
+            font-size: 0.875rem;
+            transition: all 0.2s ease-in-out;
+            width: 100%;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--cyber-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background-color: var(--slate-700);
+        }
+        
+        .form-input:hover {
+            border-color: var(--slate-600);
+        }
+        
+        /* File upload styling */
+        .file-upload-area {
+            border: 2px dashed var(--slate-700);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s ease-in-out;
+            background-color: var(--slate-800);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--cyber-blue);
+            background-color: var(--slate-700);
+        }
+        
+        .file-upload-area.dragover {
+            border-color: var(--neon-green);
+            background-color: rgba(16, 185, 129, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .file-upload-area input[type="file"] {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+        
+        /* Enhanced header */
+        header h1 {
+            background: linear-gradient(135deg, var(--cyber-blue), var(--electric-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: subtle-glow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes subtle-glow {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.1); }
+        }
+        
+        /* Modern card styling */
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--slate-700);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Improved settings organization */
+        .settings-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--slate-300);
+            font-size: 0.875rem;
+        }
+        
+        /* Checkbox styling */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             padding: 0.75rem;
             border-radius: 0.5rem;
-            background-color: var(--midnight);
-            border: 1px solid #374151;
-            color: var(--cyber-blue);
+            background-color: var(--slate-800);
+            border: 1px solid var(--slate-700);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
         }
-        input:focus, select:focus {
-            outline: none;
+        
+        .checkbox-wrapper:hover {
+            background-color: var(--slate-700);
+            border-color: var(--slate-600);
         }
-        header h1 {
-            animation: glitch 2s linear infinite;
+        
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 0.25rem;
+            border: 2px solid var(--slate-600);
+            background-color: var(--slate-700);
+            cursor: pointer;
         }
-        @keyframes glitch {
-            2%, 64% { transform: translate(2px, 0) skew(0deg); }
-            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
-            62% { transform: translate(0, 0) skew(5deg); }
+        
+        .checkbox-wrapper input[type="checkbox"]:checked {
+            background-color: var(--cyber-blue);
+            border-color: var(--cyber-blue);
         }
-        /* .section-glow {
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
-        } */
+        
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .spinner {
+            border: 2px solid var(--slate-700);
+            border-top: 2px solid var(--cyber-blue);
+            border-radius: 50%;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ASCII output area */
+        #ascii-art {
+            background: var(--slate-900);
+            border: 1px solid var(--slate-700);
+            border-radius: 0.75rem;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         #ascii-art canvas {
             width: 100% !important;
             max-width: 100%;
+            border-radius: 0.5rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: var(--slate-500);
+            padding: 3rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--slate-600);
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .file-upload-area {
+                padding: 1.5rem;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+        }
+        
+        /* Focus styles for accessibility */
+        .btn:focus,
+        .form-input:focus,
+        .file-upload-area:focus {
+            outline: 2px solid var(--cyber-blue);
+            outline-offset: 2px;
+        }
+        
+        /* Enhanced animations and micro-interactions */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Improved button hover effects */
+        .btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        /* Enhanced form focus states */
+        .form-input:focus {
+            transform: translateY(-1px);
+        }
+        
+        /* Progress indicator */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: var(--slate-700);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyber-blue), var(--electric-purple));
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--slate-800);
+            border: 1px solid var(--slate-700);
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            color: var(--slate-200);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            border-color: var(--success-green);
+        }
+        
+        .toast.error {
+            border-color: var(--danger-red);
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: inherit;
+            z-index: 10;
+        }
+        
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid var(--slate-700);
+            border-top: 3px solid var(--cyber-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Enhanced card shadows */
+        .card:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        
+        /* Better accessibility focus */
+        *:focus-visible {
+            outline: 2px solid var(--cyber-blue);
+            outline-offset: 2px;
+            border-radius: 0.25rem;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--slate-800);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--slate-600);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--slate-500);
+        }
+        /* Hidden state */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Smooth transitions for all interactive elements */
+        * {
+            transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
         }
     </style>
 </head>
 <body>
-    <header class="bg-midnight text-cyber-blue p-8">
-        <h1 class="text-4xl font-bold text-center">ASCII Unleashed</h1>
+    <header class="bg-slate-900 text-slate-200 py-12 px-8">
+        <div class="container mx-auto text-center">
+            <h1 class="text-5xl font-bold mb-4">ASCII Unleashed</h1>
+            <p class="text-slate-400 text-lg">Transform your images and videos into stunning ASCII art</p>
+        </div>
     </header>
-    <main class="container mx-auto p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <section id="input-section" class="bg-charcoal p-8 rounded-xl section-glow">
-            <h2 class="text-2xl font-bold mb-6 text-neon-green">Upload Your Media</h2>
-            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-6">
-                <div class="w-full md:w-1/2">
-                    <label for="image-input" class="block text-sm text-electric-purple">Upload Image</label>
-                    <input type="file" id="image-input" accept="image/*" class="w-full">
+    <main class="container mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl">
+        <section id="input-section" class="card">
+            <h2 class="text-2xl font-semibold mb-8 text-neon-green flex items-center gap-3">
+                <i class="fas fa-upload"></i>
+                Upload Your Media
+            </h2>
+            
+            <!-- File Upload Areas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-image mr-2"></i>
+                        Upload Image
+                    </label>
+                    <div class="file-upload-area" id="image-upload-area">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-slate-500 mb-3"></i>
+                        <p class="text-slate-400 mb-2">Drag & drop an image here</p>
+                        <p class="text-slate-500 text-sm">or click to browse</p>
+                        <input type="file" id="image-input" accept="image/*" aria-label="Upload Image">
+                    </div>
                 </div>
-                <div class="w-full md:w-1/2">
-                    <label for="video-input" class="block text-sm text-electric-purple">Upload Video</label>
-                    <input type="file" id="video-input" accept="video/*" class="w-full">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-video mr-2"></i>
+                        Upload Video
+                    </label>
+                    <div class="file-upload-area" id="video-upload-area">
+                        <i class="fas fa-video text-3xl text-slate-500 mb-3"></i>
+                        <p class="text-slate-400 mb-2">Drag & drop a video here</p>
+                        <p class="text-slate-500 text-sm">or click to browse</p>
+                        <input type="file" id="video-input" accept="video/*" aria-label="Upload Video">
+                    </div>
                 </div>
             </div>
-            <img id="image-preview" class="max-w-md h-auto rounded-lg mb-6 border border-cyber-blue hidden" alt="Image Preview">
-            <video id="video-element" style="display: none;"></video>
-            <button id="play-pause-button" class="btn hidden">Play/Pause</button>
-            <h2 class="text-2xl font-bold mb-6 text-neon-green">Settings</h2>
-            <div id="settings-panel" class="space-y-6">
-                <div>
-                    <label for="columns" class="block text-sm text-electric-purple">Columns</label>
-                    <input type="number" id="columns" value="80" min="10" max="200" class="w-full">
+            
+            <!-- Preview Area -->
+            <div id="preview-area" class="mb-8">
+                <img id="image-preview" class="max-w-full h-auto rounded-lg border border-slate-700 hidden" alt="Image Preview">
+                <video id="video-element" style="display: none;"></video>
+                <button id="play-pause-button" class="btn hidden mt-4">
+                    <i class="fas fa-play"></i>
+                    Play/Pause
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-semibold mb-8 text-neon-green flex items-center gap-3">
+                <i class="fas fa-cog"></i>
+                Settings
+            </h2>
+            
+            <div id="settings-panel" class="settings-grid">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label for="columns" class="form-label">
+                            <i class="fas fa-arrows-alt-h mr-2"></i>
+                            Columns
+                        </label>
+                        <input type="number" id="columns" value="80" min="10" max="200" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="rows" class="form-label">
+                            <i class="fas fa-arrows-alt-v mr-2"></i>
+                            Rows
+                        </label>
+                        <input type="number" id="rows" value="40" min="10" max="200" class="form-input">
+                    </div>
                 </div>
-                <div>
-                    <label for "rows" class="block text-sm text-electric-purple">Rows</label>
-                    <input type="number" id="rows" value="40" min="10" max="200" class="w-full">
-                </div>
-                <div>
-                    <label for="char-set" class="block text-sm text-electric-purple">Character Set</label>
-                    <select id="char-set" class="w-full">
-                        <option value="matrix">Matrix</option>
+                
+                <div class="form-group">
+                    <label for="char-set" class="form-label">
+                        <i class="fas fa-font mr-2"></i>
+                        Character Set
+                    </label>
+                    <select id="char-set" class="form-input">
+                        <option value="matrix">Matrix Style</option>
                         <option value="standard">Standard ASCII</option>
                         <option value="extended">Extended ASCII</option>
                         <option value="emojis">Emojis</option>
                         <option value="starwars">Star Wars</option>
                         <option value="minecraft">Minecraft</option>
-                        <option value="custom">Custom</option>
+                        <option value="custom">Custom Characters</option>
                     </select>
                 </div>
-                <div id="custom-char-set" class="hidden">
-                    <label for="custom-chars" class="block text-sm text-electric-purple">Custom Characters (dark to light)</label>
-                    <input type="text" id="custom-chars" class="w-full" placeholder="e.g., @%#*+=-:. ">
+                
+                <div id="custom-char-set" class="form-group hidden">
+                    <label for="custom-chars" class="form-label">
+                        <i class="fas fa-edit mr-2"></i>
+                        Custom Characters (dark to light)
+                    </label>
+                    <input type="text" id="custom-chars" class="form-input" placeholder="e.g., @%#*+=-:. ">
+                    <p class="text-slate-500 text-sm mt-1">Enter characters from darkest to lightest</p>
                 </div>
-                <div class="flex items-center">
-                    <input type="checkbox" id="ai-enhance" class="mr-2 bg-midnight border-gray-700">
-                    <label for="ai-enhance" class="text-sm text-electric-purple">AI Enhancement (Images Only)</label>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="ai-enhance">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-brain text-electric-purple"></i>
+                            <span>AI Enhancement</span>
+                        </div>
+                    </label>
+                    
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="animation">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-magic text-accent-orange"></i>
+                            <span>Animation Effect</span>
+                        </div>
+                    </label>
                 </div>
-                <div class="flex items-center">
-                    <input type="checkbox" id="animation" class="mr-2 bg-midnight border-gray-700">
-                    <label for="animation" class="text-sm text-electric-purple">Animation (Images Only)</label>
-                </div>
-                <div>
-                    <label for="bg-color" class="block text-sm text-electric-purple">Background Color</label>
-                    <input type="color" id="bg-color" value="#111827" class="w-full h-10 p-1 rounded-lg bg-midnight border border-gray-700">
+                
+                <div class="form-group">
+                    <label for="bg-color" class="form-label">
+                        <i class="fas fa-palette mr-2"></i>
+                        Background Color
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="bg-color" value="#0F172A" class="w-16 h-12 rounded-lg border border-slate-700 bg-slate-800 cursor-pointer">
+                        <span class="text-slate-400 text-sm">Choose background color for your ASCII art</span>
+                    </div>
                 </div>
             </div>
         </section>
-        <section id="ascii-section" class="bg-charcoal p-8 rounded-xl section-glow">
-            <h2 class="text-2xl font-bold mb-6 text-neon-green">Your ASCII Art</h2>
-            <div id="ascii-art" class="overflow-auto p-6 bg-midnight rounded-lg shadow-inner border border-cyber-blue"></div>
+        <section id="ascii-section" class="card">
+            <h2 class="text-2xl font-semibold mb-8 text-neon-green flex items-center gap-3">
+                <i class="fas fa-terminal"></i>
+                Your ASCII Art
+            </h2>
+            <div id="ascii-art" class="overflow-auto">
+                <div class="empty-state">
+                    <i class="fas fa-image"></i>
+                    <h3 class="text-xl font-medium mb-2">No ASCII art yet</h3>
+                    <p>Upload an image or video to get started</p>
+                </div>
+            </div>
         </section>
     </main>
-    <footer class="bg-midnight p-8 text-center space-x-4">
-        <button id="convert-button" class="btn">Convert</button>
-        <button id="challenge-button" class="btn">Challenge Me</button>
-        <button id="download-text-button" class="btn hidden">Download Text</button>
-        <button id="download-image-button" class="btn hidden">Download Image</button>
-        <button id="record-video-button" class="btn hidden">Record Video</button>
-        <button id="stop-record-button" class="btn hidden">Stop Recording</button>
+    <footer class="bg-slate-900 py-8 px-6">
+        <div class="container mx-auto">
+            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                <button id="convert-button" class="btn">
+                    <i class="fas fa-magic"></i>
+                    Convert to ASCII
+                </button>
+                <button id="challenge-button" class="btn btn-secondary">
+                    <i class="fas fa-dice"></i>
+                    Random Challenge
+                </button>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="download-text-button" class="btn hidden">
+                    <i class="fas fa-download"></i>
+                    Download Text
+                </button>
+                <button id="download-image-button" class="btn hidden">
+                    <i class="fas fa-image"></i>
+                    Download Image
+                </button>
+                <button id="record-video-button" class="btn hidden">
+                    <i class="fas fa-video"></i>
+                    Record Video
+                </button>
+                <button id="stop-record-button" class="btn btn-secondary hidden">
+                    <i class="fas fa-stop"></i>
+                    Stop Recording
+                </button>
+            </div>
+        </div>
     </footer>
 
     <script>
@@ -155,6 +641,111 @@
             await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
         }
         loadModels();
+
+        // Drag and drop functionality
+        function setupDragAndDrop() {
+            const imageUploadArea = document.getElementById('image-upload-area');
+            const videoUploadArea = document.getElementById('video-upload-area');
+            const imageInput = document.getElementById('image-input');
+            const videoInput = document.getElementById('video-input');
+
+            // Image upload area
+            imageUploadArea.addEventListener('click', () => imageInput.click());
+            imageUploadArea.addEventListener('dragover', handleDragOver);
+            imageUploadArea.addEventListener('dragleave', handleDragLeave);
+            imageUploadArea.addEventListener('drop', (e) => handleFileDrop(e, 'image'));
+
+            // Video upload area
+            videoUploadArea.addEventListener('click', () => videoInput.click());
+            videoUploadArea.addEventListener('dragover', handleDragOver);
+            videoUploadArea.addEventListener('dragleave', handleDragLeave);
+            videoUploadArea.addEventListener('drop', (e) => handleFileDrop(e, 'video'));
+
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.add('dragover');
+            }
+
+            function handleDragLeave(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.remove('dragover');
+            }
+
+            function handleFileDrop(e, type) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (type === 'image' && file.type.startsWith('image/')) {
+                        imageInput.files = files;
+                        imageInput.dispatchEvent(new Event('change'));
+                    } else if (type === 'video' && file.type.startsWith('video/')) {
+                        videoInput.files = files;
+                        videoInput.dispatchEvent(new Event('change'));
+                    }
+                }
+            }
+        }
+
+        // Initialize drag and drop
+        setupDragAndDrop();
+
+        // Add smooth scrolling and animations
+        function addAnimations() {
+            // Fade in elements on page load
+            document.querySelectorAll('.card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Add loading state to buttons
+        function setButtonLoading(button, loading = true) {
+            if (loading) {
+                button.dataset.originalText = button.innerHTML;
+                button.innerHTML = '<div class="loading-spinner mr-2"></div>Processing...';
+                button.disabled = true;
+            } else {
+                button.innerHTML = button.dataset.originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Initialize animations
+        addAnimations();
 
         // Event listeners for settings changes
         document.getElementById('columns').addEventListener('input', () => {
@@ -196,14 +787,32 @@
         document.getElementById('bg-color').addEventListener('input', () => {
             if (!isVideoMode) convertToAscii();
         });
-        document.getElementById('convert-button').addEventListener('click', () => {
-            if (!isVideoMode) convertToAscii();
+        document.getElementById('convert-button').addEventListener('click', async () => {
+            if (!isVideoMode) {
+                const convertButton = document.getElementById('convert-button');
+                setButtonLoading(convertButton, true);
+                
+                try {
+                    await convertToAscii();
+                    showToast('ASCII art generated successfully!', 'success');
+                } catch (error) {
+                    showToast('Error generating ASCII art. Please try again.', 'error');
+                    console.error('Conversion error:', error);
+                } finally {
+                    setButtonLoading(convertButton, false);
+                }
+            }
         });
 
         // Image upload handler
         document.getElementById('image-input').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
+                if (!file.type.startsWith('image/')) {
+                    showToast('Please select a valid image file.', 'error');
+                    return;
+                }
+                
                 isVideoMode = false;
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -212,7 +821,9 @@
                     img.classList.remove('hidden');
                     img.onload = () => {
                         autoSetResolution(img);
-                        convertToAscii();
+                        showToast('Image uploaded successfully!', 'success');
+                        // Auto-convert after upload
+                        setTimeout(convertToAscii, 500);
                     };
                 };
                 reader.readAsDataURL(file);
@@ -228,12 +839,18 @@
         document.getElementById('video-input').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
+                if (!file.type.startsWith('video/')) {
+                    showToast('Please select a valid video file.', 'error');
+                    return;
+                }
+                
                 isVideoMode = true;
                 const url = URL.createObjectURL(file);
                 videoElement.src = url;
                 videoElement.load();
                 videoElement.onloadedmetadata = () => {
                     autoSetResolution(videoElement);
+                    showToast('Video uploaded successfully!', 'success');
                 };
                 document.getElementById('image-preview').classList.add('hidden');
                 playPauseButton.classList.remove('hidden');
@@ -294,8 +911,9 @@
                 }
                 const blob = new Blob([asciiText], { type: 'text/plain;charset=utf-8' });
                 saveAs(blob, 'ascii-art.txt');
+                showToast('ASCII text file downloaded!', 'success');
             } else {
-                alert('No ASCII art to download yet! Convert an image first.');
+                showToast('No ASCII art to download. Please convert an image first.', 'error');
             }
         });
 
@@ -306,8 +924,9 @@
                 link.download = 'ascii-art.png';
                 link.href = currentCanvas.toDataURL('image/png');
                 link.click();
+                showToast('ASCII image downloaded!', 'success');
             } else {
-                alert('No ASCII art to download yet! Convert an image first.');
+                showToast('No ASCII art to download. Please convert an image first.', 'error');
             }
         });
 
@@ -513,6 +1132,13 @@
             const img = document.getElementById('image-preview');
             if (!img.src) return;
 
+            // Hide empty state and show loading
+            const asciiArtElement = document.getElementById('ascii-art');
+            const emptyState = asciiArtElement.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+
             let detections = [];
             if (settings.aiEnhance) {
                 detections = await detectFaces(img);
@@ -540,7 +1166,6 @@
             const scaleX = settings.columns / img.naturalWidth;
             const scaleY = settings.rows / img.naturalHeight;
 
-            const asciiArtElement = document.getElementById('ascii-art');
             asciiArtElement.innerHTML = '';
             asciiArtElement.appendChild(canvas);
             currentCanvas = canvas;
@@ -636,6 +1261,10 @@
             }
 
             const asciiArtElement = document.getElementById('ascii-art');
+            const emptyState = asciiArtElement.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
             asciiArtElement.innerHTML = '';
             asciiArtElement.appendChild(canvas);
             currentCanvas = canvas;
